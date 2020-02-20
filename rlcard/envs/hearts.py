@@ -9,15 +9,14 @@ from rlcard.games.hearts.game import HeartsGame as Game
 class HeartsEnv(Env):
     ''' Hearts Environment
     '''
-#TODO
+
     def __init__(self, allow_step_back=False):
         ''' Initialize the Hearts environment
         '''
         super().__init__(Game(allow_step_back), allow_step_back)
-        #self.actions = ['call', 'fold', 'check']
-        #self.state_shape = [54]
-        #for raise_amount in range(1, self.game.init_chips+1):
-        #    self.actions.append(raise_amount)
+        valid_suit = ['S', 'H', 'D', 'C']
+        valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
+        self.actions = [x + y for x in valid_suit for y in valid_rank]
 
         with open(os.path.join(rlcard.__path__[0], 'games/hearts/card2index.json'), 'r') as file:
             self.card2index = json.load(file)
@@ -29,7 +28,7 @@ class HeartsEnv(Env):
             encoded_action_list (list): return encoded legal action list (from str to int)
         '''
         return self.game.get_legal_actions()
-#TODO
+
     def extract_state(self, state):
         ''' Extract the state representation from state dictionary for agent
 
@@ -41,23 +40,15 @@ class HeartsEnv(Env):
         Returns:
             observation (list): combine the player's score and dealer's observable score for observation
         '''
+        # TODO for project group: Improve this
         processed_state = {}
 
-        legal_actions = [self.actions.index(a) for a in state['legal_actions']]
-        processed_state['legal_actions'] = legal_actions
-
-        public_cards = state['public_cards']
-        hand = state['hand']
-        my_chips = state['my_chips']
-        all_chips = state['all_chips']
-        cards = public_cards + hand
-        idx = [self.card2index[card] for card in cards]
-        obs = np.zeros(54)
-        obs[idx] = 1
-        obs[52] = float(my_chips)
-        obs[53] = float(max(all_chips))
-        processed_state['obs'] = obs
-
+        for key,value in state:
+            if key == 'legal_actions':
+                legal_actions = [self.actions.index(a) for a in state['legal_actions']]
+                processed_state['legal_actions'] = legal_actions
+            else:
+                processed_state[key] = value # Current hand (list of IDs), played cards (list of IDs), target suit (String) 
         return processed_state
 
     def get_payoffs(self):
@@ -67,7 +58,7 @@ class HeartsEnv(Env):
            payoffs (list): list of payoffs
         '''
         return self.game.get_payoffs()
-#TODO
+
     def decode_action(self, action_id):
         ''' Decode the action for applying to the game
 
@@ -79,8 +70,5 @@ class HeartsEnv(Env):
         '''
         legal_actions = self.game.get_legal_actions()
         if self.actions[action_id] not in legal_actions:
-            if 'check' in legal_actions:
-                return 'check'
-            else:
-                return 'fold'
+            raise "Selected action is illegal!"
         return self.actions[action_id]

@@ -37,3 +37,8 @@ register(
     env_id='mahjong',
     entry_point='rlcard.envs.mahjong:MahjongEnv',
 )
+
+register(
+    env_id='hearts',
+    entry_point='rlcard.envs.hearts:HeartsEnv',
+)
