@@ -114,5 +114,11 @@ class HeartsRound(object):
         state['target'] = self.target_suit
         state['played_cards'] = [c.get_index() for c in self.played_cards]
         state['legal_actions'] = self.get_legal_actions(players, player_id)
+
+        collected = []
+        for player in players:
+            collected = collected + [c.get_index() for c in player.collected]
+        state['collected'] = collected
+
         #state['collected'] = [c.get_index() for c in player.collected] # For game debugging only (will increase state space)
         return state

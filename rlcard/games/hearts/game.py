@@ -40,6 +40,8 @@ class HeartsGame(object):
         # Save the hisory for stepping back to the last state.
         self.history = []
 
+        self.card_played_in_game = []
+
         player_id = self.round.current_player
         state = self.get_state(player_id)
         return state, player_id
