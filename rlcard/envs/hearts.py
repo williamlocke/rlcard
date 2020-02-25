@@ -53,6 +53,7 @@ class HeartsEnv(Env):
                 processed_state[key] = value # Current hand (list of IDs), played cards (list of IDs), target suit (String)
 
         obs = np.zeros(self.state_shape)
+
         # add card in players own hand to the observed state
         idx = [self.card2index[card] for card in state['hand']]
         obs[idx] = 1

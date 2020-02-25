@@ -2,6 +2,7 @@ from rlcard.games.hearts.dealer import HeartsDealer as Dealer
 from rlcard.games.hearts.player import HeartsPlayer as Player
 from rlcard.games.hearts.round import HeartsRound as Round
 from rlcard.games.hearts.utils import get_first_player
+import copy
 
 class HeartsGame(object):
 
@@ -61,9 +62,9 @@ class HeartsGame(object):
 
         if self.allow_step_back:
             # First snapshot the current state
-            his_dealer = deepcopy(self.dealer)
-            his_round = deepcopy(self.round)
-            his_players = deepcopy(self.players)
+            his_dealer = copy.deepcopy(self.dealer)
+            his_round = copy.deepcopy(self.round)
+            his_players = copy.deepcopy(self.players)
             self.history.append((his_dealer, his_players, his_round))
 
         self.round.proceed_round(self.players, action)
