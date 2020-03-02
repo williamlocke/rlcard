@@ -16,6 +16,8 @@ class HeartsGame(object):
 
         self.dealer_class = HeartsDealer
         self.dealer = self.dealer_class()
+
+        self.deck_size = len(self.dealer.deck)
  
     def init_game(self):
         ''' Initialize players and state
@@ -113,7 +115,7 @@ class HeartsGame(object):
                 if card.suit == 'H':
                     self.payoffs[idx] -= 1
                 elif (card.suit == 'S' and card.rank == 'Q'):
-                    self.payoffs[idx] -= 13
+                    self.payoffs[idx] -= (self.deck_size / 4)
             if self.shooting_the_moon_enabled:
                 if self.payoffs[idx] == -26: # Shooting the moon
                     self.payoffs[idx] = 0
@@ -147,7 +149,7 @@ class HeartsGame(object):
         Returns:
             (int): The number of actions. There are 52 (size of deck) actions
         '''
-        return 52
+        return self.deck_size
 
     def get_player_id(self):
         ''' Return the current player's id
