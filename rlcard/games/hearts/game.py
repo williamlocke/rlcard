@@ -1,4 +1,5 @@
-from rlcard.games.hearts.dealer import HeartsDealer as Dealer
+from rlcard.games.hearts.dealer import HeartsDealer
+from rlcard.games.hearts.dealer import HeartsMiniDealer
 from rlcard.games.hearts.player import HeartsPlayer as Player
 from rlcard.games.hearts.round import HeartsRound as Round
 from rlcard.games.hearts.utils import get_first_player
@@ -12,6 +13,9 @@ class HeartsGame(object):
         self.num_players = 4
         self.payoffs = [0 for _ in range(self.num_players)]
         self.history = []
+
+        self.dealer_class = HeartsDealer
+        self.dealer = self.dealer_class()
  
     def init_game(self):
         ''' Initialize players and state
@@ -26,7 +30,7 @@ class HeartsGame(object):
         self.payoffs = [0 for _ in range(self.num_players)]
 
         # Initialize a dealer that can deal cards
-        self.dealer = Dealer()
+        self.dealer = self.dealer_class()
 
         # Initialize four players to play the game
         self.players = [Player(i) for i in range(self.num_players)]
@@ -160,6 +164,16 @@ class HeartsGame(object):
             (boolean): True if the game is over
         '''
         return self.round.is_over
+
+
+class HeartsMiniGame(HeartsGame):
+    def __init__(self, allow_step_back=False):
+        super().__init__(allow_step_back)
+        self.dealer_class = HeartsMiniDealer
+        self.dealer = self.dealer_class()
+
+
+
 # Done
 
 ## For test

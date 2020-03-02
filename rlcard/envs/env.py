@@ -30,7 +30,6 @@ class Env(object):
         self.active_player = None
         self.human_mode = False
 
-
     def init_game(self):
         ''' Start a new game
 

@@ -4,7 +4,8 @@ import numpy as np
 
 import rlcard
 from rlcard.envs.env import Env
-from rlcard.games.hearts.game import HeartsGame as Game
+from rlcard.games.hearts.game import HeartsGame
+from rlcard.games.hearts.game import HeartsMiniGame
 
 class HeartsEnv(Env):
     ''' Hearts Environment
@@ -13,15 +14,22 @@ class HeartsEnv(Env):
     def __init__(self, allow_step_back=False):
         ''' Initialize the Hearts environment
         '''
-        super().__init__(Game(allow_step_back), allow_step_back)
+        if self.game_class is None:
+            self.game_class = HeartsGame
+
+        super().__init__(self.game_class(allow_step_back), allow_step_back)
         valid_suit = ['S', 'H', 'D', 'C']
         valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
         self.actions = [x + y for x in valid_suit for y in valid_rank]
 
-        self.state_shape = [52 * 3]
+        self.state_shape = [len(self.game.dealer.deck) * 3]
 
         with open(os.path.join(rlcard.__path__[0], 'games/hearts/card2index.json'), 'r') as file:
-            self.card2index = json.load(file)
+            #self.card2index = json.load(file)
+            card2index = {}
+            for i, card in enumerate(self.game.dealer.deck):
+                card2index[card.get_index()] = i
+            self.card2index = card2index
 
     def get_legal_actions(self):
         ''' Get all leagal actions
@@ -58,14 +66,17 @@ class HeartsEnv(Env):
         idx = [self.card2index[card] for card in state['hand']]
         obs[idx] = 1
 
+
+        deck_size = len(self.game.dealer.deck)
+
         # add cards played in round to the observed state.
         # TODO: create separate representation for history of played cards and
         #  cards played in the current round thus far
-        idx = [self.card2index[card] + 52 for card in state['played_cards']]
+        idx = [self.card2index[card] + deck_size for card in state['played_cards']]
         obs[idx] = 1
 
         # add cards played in game to the observed state.
-        idx = [self.card2index[card] + 104 for card in state['collected']]
+        idx = [self.card2index[card] + deck_size * 2 for card in state['collected']]
         obs[idx] = 1
         processed_state['obs'] = obs
         return processed_state
@@ -91,4 +102,10 @@ class HeartsEnv(Env):
         if self.actions[action_id] not in legal_actions:
             raise "Selected action is illegal!"
         return self.actions[action_id]
+
+
+class HeartsMiniEnv(HeartsEnv):
+    def __init__(self, allow_step_back=False):
+        self.game_class = HeartsMiniGame
+        super(HeartsMiniEnv, self).__init__(allow_step_back)
 
