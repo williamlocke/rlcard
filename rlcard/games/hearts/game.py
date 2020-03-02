@@ -149,7 +149,7 @@ class HeartsGame(object):
         Returns:
             (int): The number of actions. There are 52 (size of deck) actions
         '''
-        return self.deck_size
+        return 52
 
     def get_player_id(self):
         ''' Return the current player's id
@@ -173,6 +173,15 @@ class HeartsMiniGame(HeartsGame):
         super().__init__(allow_step_back)
         self.dealer_class = HeartsMiniDealer
         self.dealer = self.dealer_class()
+
+    @staticmethod
+    def get_action_num():
+        ''' Return the number of applicable actions
+
+        Returns:
+            (int): The number of actions. There are 52 (size of deck) actions
+        '''
+        return 16
 
 
 

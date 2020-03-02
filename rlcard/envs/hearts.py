@@ -18,8 +18,15 @@ class HeartsEnv(Env):
             self.game_class = HeartsGame
 
         super().__init__(self.game_class(allow_step_back), allow_step_back)
-        valid_suit = ['S', 'H', 'D', 'C']
-        valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
+        suits = []
+        ranks = []
+        for card in self.game.dealer.deck:
+            suits.append(card.suit)
+            ranks.append(card.rank)
+        valid_suit = list(set(suits))
+        valid_rank = list(set(ranks))
+        # valid_suit = ['S', 'H', 'D', 'C']
+        # valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
         self.actions = [x + y for x in valid_suit for y in valid_rank]
 
         self.state_shape = [len(self.game.dealer.deck) * 3]
