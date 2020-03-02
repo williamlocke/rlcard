@@ -14,7 +14,7 @@ class HeartsEnv(Env):
     def __init__(self, allow_step_back=False):
         ''' Initialize the Hearts environment
         '''
-        if self.game_class is None:
+        if not hasattr(self, 'game_class'):
             self.game_class = HeartsGame
 
         super().__init__(self.game_class(allow_step_back), allow_step_back)
