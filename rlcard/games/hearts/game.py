@@ -75,6 +75,14 @@ class HeartsGame(object):
 
         self.round.proceed_round(self.players, action)
 
+        if self.is_over():
+            if self.allow_step_back:
+                # First snapshot the current state
+                his_dealer = copy.deepcopy(self.dealer)
+                his_round = copy.deepcopy(self.round)
+                his_players = copy.deepcopy(self.players)
+                self.history.append((his_dealer, his_players, his_round))
+
         player_id = self.round.current_player
         state = self.get_state(player_id)
         return state, player_id

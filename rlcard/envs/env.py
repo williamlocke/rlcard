@@ -268,15 +268,6 @@ class Env(object):
             except:
                 self.p = [0] * 4
 
-            # # print("Player ID: %d" % player_id)
-            # # print(payoffs)
-            # # if payoffs[0] >= -3:
-            # for i in range(4):
-            #     self.p[i] += payoffs[i]
-            #     print(self.p)
-
-
-
         return trajectories, payoffs
 
     def run_multi(self, task_num, result, is_training=False, seed=None):

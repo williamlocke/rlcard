@@ -29,7 +29,8 @@ class HeartsEnv(Env):
         # valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
         self.actions = [x + y for x in valid_suit for y in valid_rank]
 
-        self.state_shape = [len(self.game.dealer.deck) * 3]
+        deck_size = self.game.__class__.get_action_num()
+        self.state_shape = [deck_size * 3]
 
         with open(os.path.join(rlcard.__path__[0], 'games/hearts/card2index.json'), 'r') as file:
             #self.card2index = json.load(file)
@@ -60,6 +61,8 @@ class HeartsEnv(Env):
         # TODO for project group: Improve this
         processed_state = {}
 
+        processed_state['readable_legal_actions'] = state['legal_actions']
+
         for key,value in state.items():
             if key == 'legal_actions':
                 legal_actions = [self.actions.index(a) for a in state['legal_actions']]
@@ -74,7 +77,7 @@ class HeartsEnv(Env):
         obs[idx] = 1
 
 
-        deck_size = len(self.game.dealer.deck)
+        deck_size = self.game.__class__.get_action_num()
 
         # add cards played in round to the observed state.
         # TODO: create separate representation for history of played cards and
