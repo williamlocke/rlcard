@@ -30,7 +30,7 @@ class HeartsEnv(Env):
         self.actions = [x + y for x in valid_suit for y in valid_rank]
 
         deck_size = self.game.__class__.get_action_num()
-        self.state_shape = [deck_size * 3]
+        self.state_shape = [deck_size * 3 + self.custom_features_length()]
 
         with open(os.path.join(rlcard.__path__[0], 'games/hearts/card2index.json'), 'r') as file:
             #self.card2index = json.load(file)
@@ -46,6 +46,36 @@ class HeartsEnv(Env):
             encoded_action_list (list): return encoded legal action list (from str to int)
         '''
         return self.game.get_legal_actions()
+
+
+    def custom_features_length(self):
+        return 3
+
+    def custom_features(self, state):
+        trick = state['played_cards']
+        target = None
+        if len(trick) > 0:
+            target = trick[0]
+        player_hand = state['hand']
+
+        if target is not None:
+            has_target = any([c[0] == target[0] for c in player_hand])
+        else:
+            has_target = False
+        has_QS = ('SQ' in player_hand)
+        has_hearts = any([c[0] == 'H' for c in player_hand])
+        features = [0] * self.custom_features_length()
+
+        if not has_target and not target is None:
+            if has_QS and len(player_hand) > 1:
+                features[0] = 1
+            if has_hearts and len(player_hand) > 1 and not all([c[0] == 'H' for c in player_hand]) and \
+                        any([c[0] == 'H' and c[1] in ['A', 'K', 'Q', 'J'] for c in player_hand]):
+                features[1] = 1
+            if not has_hearts and len(player_hand) > 1 and any([c[1] in ['A', 'K', 'Q', 'J'] for c in player_hand]):
+                features[2] = 1
+        return features
+
 
     def extract_state(self, state):
         ''' Extract the state representation from state dictionary for agent
@@ -88,7 +118,11 @@ class HeartsEnv(Env):
         # add cards played in game to the observed state.
         idx = [self.card2index[card] + deck_size * 2 for card in state['collected']]
         obs[idx] = 1
+
+        feats = self.custom_features(state)
+        obs[self.state_shape[0] - self.custom_features_length():] = feats
         processed_state['obs'] = obs
+
         return processed_state
 
     def get_payoffs(self):
