@@ -29,8 +29,8 @@ class HeartsDealer(object):
 class HeartsMiniDealer(HeartsDealer):
     def __init__(self):
         super().__init__()
-        # restricted_deck = ['A', 'K', 'Q', '2']
-        restricted_deck = ['Q', '2']
+        restricted_deck = ['A', 'K', 'Q', '2']
+        #restricted_deck = ['Q', '2']
 
         if restricted_deck:
             new_deck = []

@@ -189,7 +189,7 @@ class HeartsMiniGame(HeartsGame):
         Returns:
             (int): The number of actions. There are 52 (size of deck) actions
         '''
-        return 8
+        return 17
 
 
 

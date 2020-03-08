@@ -29,7 +29,7 @@ class HeartsEnv(Env):
         # valid_rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
         self.actions = [x + y for x in valid_suit for y in valid_rank]
 
-        deck_size = self.game.__class__.get_action_num()
+        deck_size = self.game.deck_size
         self.state_shape = [deck_size * 3 + self.custom_features_length()]
 
         with open(os.path.join(rlcard.__path__[0], 'games/hearts/card2index.json'), 'r') as file:
@@ -45,7 +45,12 @@ class HeartsEnv(Env):
         Returns:
             encoded_action_list (list): return encoded legal action list (from str to int)
         '''
-        return self.game.get_legal_actions()
+        legal_actions = self.game.get_legal_actions()
+        legal_actions += [len(self.actions)]
+        legal_actions = list(set(legal_actions))
+        return legal_actions
+
+        #return self.game.get_legal_actions()
 
 
     def custom_features_length(self):
@@ -96,6 +101,7 @@ class HeartsEnv(Env):
         for key,value in state.items():
             if key == 'legal_actions':
                 legal_actions = [self.actions.index(a) for a in state['legal_actions']]
+                legal_actions += [len(self.actions)]
                 processed_state['legal_actions'] = legal_actions
             else:
                 processed_state[key] = value # Current hand (list of IDs), played cards (list of IDs), target suit (String)
@@ -133,6 +139,34 @@ class HeartsEnv(Env):
         '''
         return self.game.get_payoffs()
 
+    def heuristic_action_card(self):
+        state = self.game.get_state(self.game.round.current_player)
+        readable_legal_actions = state['legal_actions']
+        values = {'2': 2, '3': 3, '4': 4, '5': 5, '6': 6, '7': 7, '8': 8, '9': 9, 'T': 10, 'J': 11, 'Q': 12, 'K': 13,
+                  'A': 14}
+        is_last = (len(state['played_cards']) == 3)
+        is_first = (len(state['played_cards']) == 0)
+        has_target = (readable_legal_actions[0][0] == state['target'])
+        has_QS = ('SQ' in readable_legal_actions)
+        smallest_card_idx = np.argmin([values[card[1]] for card in readable_legal_actions])
+        largest_card_idx = np.argmax([values[card[1]] for card in readable_legal_actions])
+        largest_heart_idx = np.argmax(
+            [values[card[1]] if card[0] == 'H' else 0 for card in readable_legal_actions])
+        if is_first:
+            return readable_legal_actions[smallest_card_idx]
+        else:
+            if not has_target:
+                if has_QS:
+                    return 'SQ'
+                if not largest_heart_idx == 0 or readable_legal_actions[0][0] == 'H':
+                    return readable_legal_actions[largest_heart_idx]
+                else:
+                    return readable_legal_actions[largest_card_idx]
+            elif is_last:
+                return readable_legal_actions[largest_card_idx]
+        return readable_legal_actions[smallest_card_idx]
+
+
     def decode_action(self, action_id):
         ''' Decode the action for applying to the game
 
@@ -142,6 +176,11 @@ class HeartsEnv(Env):
         Returns:
             action (str): action for the game
         '''
+        if action_id >= len(self.actions):
+            custom_action_id = len(self.actions) - action_id
+            if custom_action_id == 0:
+                return self.heuristic_action_card()
+
         legal_actions = self.game.get_legal_actions()
         if self.actions[action_id] not in legal_actions:
             raise "Selected action is illegal!"
