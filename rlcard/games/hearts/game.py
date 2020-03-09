@@ -34,6 +34,8 @@ class HeartsGame(object):
         # Initialize a dealer that can deal cards
         self.dealer = self.dealer_class()
 
+        self.deck_size = len(self.dealer.deck)
+
         # Initialize four players to play the game
         self.players = [Player(i) for i in range(self.num_players)]
 
@@ -123,7 +125,7 @@ class HeartsGame(object):
                 if card.suit == 'H':
                     self.payoffs[idx] -= 1
                 elif (card.suit == 'S' and card.rank == 'Q'):
-                    self.payoffs[idx] -= (self.__class__.get_action_num() / 4)
+                    self.payoffs[idx] -= (self.deck_size / 4)
             if self.shooting_the_moon_enabled:
                 if self.payoffs[idx] == -26: # Shooting the moon
                     self.payoffs[idx] = 0
@@ -131,6 +133,12 @@ class HeartsGame(object):
                         if not idx2 == idx:
                             self.payoffs[idx2] = -26
                     return self.payoffs
+
+        payoffs_ = []
+        for p in self.payoffs:
+            p = p + 26
+            payoffs_.append(p)
+        self.payoffs = payoffs_
         return self.payoffs
 
     def get_legal_actions(self):
@@ -189,7 +197,7 @@ class HeartsMiniGame(HeartsGame):
         Returns:
             (int): The number of actions. There are 52 (size of deck) actions
         '''
-        return 8
+        return 10
 
 
 
